@@ -7,57 +7,14 @@ import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-// Mock data for events
-const mockEvents = [
-  {
-    id: 1,
-    title: "TechFest 2024",
-    organizer: "CS Department",
-    date: "15 NOV",
-    type: "Conference",
-    registrationOpen: true,
-  },
-  {
-    id: 2,
-    title: "AI Workshop",
-    organizer: "AI Club",
-    date: "20 NOV",
-    type: "Workshop",
-    registrationOpen: true,
-  },
-  {
-    id: 3,
-    title: "Career Fair",
-    organizer: "Placement Cell",
-    date: "25 NOV",
-    type: "Recruitment",
-    registrationOpen: false,
-  },
-  {
-    id: 4,
-    title: "Hackathon",
-    organizer: "Coding Club",
-    date: "30 NOV",
-    type: "Hackathon",
-    registrationOpen: true,
-  },
-  {
-    id: 5,
-    title: "Research Symposium",
-    organizer: "Research Department",
-    date: "5 DEC",
-    type: "Conference",
-    registrationOpen: true,
-  },
-  {
-    id: 6,
-    title: "Sports Meet",
-    organizer: "Sports Department",
-    date: "10 DEC",
-    type: "Recreational",
-    registrationOpen: true,
-  },
-];
+interface Event {
+  id: number;
+  title: string;
+  organizer: string;
+  date: string;
+  type: string;
+  registrationOpen: boolean;
+}
 
 const categories = [
   "All",
@@ -69,18 +26,52 @@ const categories = [
 ];
 
 export default function EventHub() {
-  const [events, setEvents] = useState(mockEvents);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const filteredEvents = mockEvents.filter(
+    const fetchEvents = async () => {
+      try {
+        const res = await fetch("/api/events");
+        if (!res.ok) {
+          throw new Error("Failed to fetch events");
+        }
+        const data: Event[] = await res.json();
+        setEvents(data);
+        setLoading(false);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (err: any) {
+        console.error(err);
+        setError(err.message || "An error occurred");
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    const filtered = events.filter(
       (event) =>
         event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
         (selectedCategory === "All" || event.type === selectedCategory)
     );
-    setEvents(filteredEvents);
-  }, [searchTerm, selectedCategory]);
+    setFilteredEvents(filtered);
+  }, [searchTerm, selectedCategory, events]);
+
+  if (loading) {
+    return <div className="text-center text-xl">Loading events...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-xl text-red-500">Error: {error}</div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
@@ -127,35 +118,41 @@ export default function EventHub() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
-            <motion.div
-              key={event.id}
-              className="bg-gray-800 rounded-lg overflow-hidden"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="h-40 bg-gray-700"></div>
-              <div className="p-4">
-                <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
-                <p className="text-gray-400 mb-2">{event.organizer}</p>
-                <div className="flex justify-between items-center">
-                  <span className="bg-gray-700 px-2 py-1 rounded">
-                    {event.date}
-                  </span>
-                  <span
-                    className={`px-2 py-1 rounded ${
-                      event.registrationOpen ? "bg-green-600" : "bg-red-600"
-                    }`}
-                  >
-                    {event.registrationOpen
-                      ? "Registrations Open"
-                      : "Registrations Closed"}
-                  </span>
+          {filteredEvents.length > 0 ? (
+            filteredEvents.map((event) => (
+              <motion.div
+                key={event.id}
+                className="bg-gray-800 rounded-lg overflow-hidden"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="h-40 bg-gray-700"></div>
+                <div className="p-4">
+                  <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
+                  <p className="text-gray-400 mb-2">{event.organizer}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="bg-gray-700 px-2 py-1 rounded">
+                      {event.date}
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded ${
+                        event.registrationOpen ? "bg-green-600" : "bg-red-600"
+                      }`}
+                    >
+                      {event.registrationOpen
+                        ? "Registrations Open"
+                        : "Registrations Closed"}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))
+          ) : (
+            <div className="col-span-full text-center text-xl">
+              No events found.
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end mt-6 space-x-2">
