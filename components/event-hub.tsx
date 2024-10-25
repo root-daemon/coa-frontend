@@ -1,86 +1,36 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 
 // Mock data for events
 const mockEvents = [
-  {
-    id: 1,
-    title: "TechFest 2024",
-    organizer: "CS Department",
-    date: "15 NOV",
-    type: "Conference",
-    registrationOpen: true,
-  },
-  {
-    id: 2,
-    title: "AI Workshop",
-    organizer: "AI Club",
-    date: "20 NOV",
-    type: "Workshop",
-    registrationOpen: true,
-  },
-  {
-    id: 3,
-    title: "Career Fair",
-    organizer: "Placement Cell",
-    date: "25 NOV",
-    type: "Recruitment",
-    registrationOpen: false,
-  },
-  {
-    id: 4,
-    title: "Hackathon",
-    organizer: "Coding Club",
-    date: "30 NOV",
-    type: "Hackathon",
-    registrationOpen: true,
-  },
-  {
-    id: 5,
-    title: "Research Symposium",
-    organizer: "Research Department",
-    date: "5 DEC",
-    type: "Conference",
-    registrationOpen: true,
-  },
-  {
-    id: 6,
-    title: "Sports Meet",
-    organizer: "Sports Department",
-    date: "10 DEC",
-    type: "Recreational",
-    registrationOpen: true,
-  },
-];
+  { id: 1, title: 'TechFest 2024', organizer: 'CS Department', date: '15 NOV', type: 'Conference', registrationOpen: true },
+  { id: 2, title: 'AI Workshop', organizer: 'AI Club', date: '20 NOV', type: 'Workshop', registrationOpen: true },
+  { id: 3, title: 'Career Fair', organizer: 'Placement Cell', date: '25 NOV', type: 'Recruitment', registrationOpen: false },
+  { id: 4, title: 'Hackathon', organizer: 'Coding Club', date: '30 NOV', type: 'Hackathon', registrationOpen: true },
+  { id: 5, title: 'Research Symposium', organizer: 'Research Department', date: '5 DEC', type: 'Conference', registrationOpen: true },
+  { id: 6, title: 'Sports Meet', organizer: 'Sports Department', date: '10 DEC', type: 'Recreational', registrationOpen: true },
+]
 
-const categories = [
-  "All",
-  "Conference",
-  "Workshop",
-  "Recruitment",
-  "Hackathon",
-  "Recreational",
-];
+const categories = ['All', 'Conference', 'Workshop', 'Recruitment', 'Hackathon', 'Recreational']
 
-export default function EventHub() {
-  const [events, setEvents] = useState(mockEvents);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+export function EventHub() {
+  const [events, setEvents] = useState(mockEvents)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('All')
 
   useEffect(() => {
-    const filteredEvents = mockEvents.filter(
-      (event) =>
-        event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        (selectedCategory === "All" || event.type === selectedCategory)
-    );
-    setEvents(filteredEvents);
-  }, [searchTerm, selectedCategory]);
+    const filteredEvents = mockEvents.filter(event => 
+      event.title.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (selectedCategory === 'All' || event.type === selectedCategory)
+    )
+    setEvents(filteredEvents)
+  }, [searchTerm, selectedCategory])
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
@@ -96,14 +46,12 @@ export default function EventHub() {
       </header>
 
       <main>
-        <h2 className="text-4xl font-bold mb-6">
-          Explore the events happening at SRM KTR Campus
-        </h2>
+        <h2 className="text-4xl font-bold mb-6">Explore the events happening at SRM KTR Campus</h2>
 
         <div className="mb-6">
           <h3 className="text-xl mb-2">Categories</h3>
           <div className="flex space-x-2 overflow-x-auto pb-2">
-            {categories.map((category) => (
+            {categories.map(category => (
               <Button
                 key={category}
                 variant={selectedCategory === category ? "default" : "outline"}
@@ -127,7 +75,7 @@ export default function EventHub() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {events.map((event) => (
+          {events.map(event => (
             <motion.div
               key={event.id}
               className="bg-gray-800 rounded-lg overflow-hidden"
@@ -140,17 +88,9 @@ export default function EventHub() {
                 <h3 className="text-xl font-semibold mb-2">{event.title}</h3>
                 <p className="text-gray-400 mb-2">{event.organizer}</p>
                 <div className="flex justify-between items-center">
-                  <span className="bg-gray-700 px-2 py-1 rounded">
-                    {event.date}
-                  </span>
-                  <span
-                    className={`px-2 py-1 rounded ${
-                      event.registrationOpen ? "bg-green-600" : "bg-red-600"
-                    }`}
-                  >
-                    {event.registrationOpen
-                      ? "Registrations Open"
-                      : "Registrations Closed"}
+                  <span className="bg-gray-700 px-2 py-1 rounded">{event.date}</span>
+                  <span className={`px-2 py-1 rounded ${event.registrationOpen ? 'bg-green-600' : 'bg-red-600'}`}>
+                    {event.registrationOpen ? 'Registrations Open' : 'Registrations Closed'}
                   </span>
                 </div>
               </div>
@@ -168,5 +108,5 @@ export default function EventHub() {
         </div>
       </main>
     </div>
-  );
+  )
 }
