@@ -1,40 +1,39 @@
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
-import type { NextApiRequest, NextApiResponse } from "next";
 
 const prisma = new PrismaClient();
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method === "GET") {
-    const { search, category } = req.query;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(request: NextRequest) {
+  try {
+    const events = await prisma.event.findMany({
+      select: {
+        id: true,
+        title: true,
+        organizer: true,
+        date: true,
+        type: true,
+        registrationOpen: true,
+      },
+    });
 
-    let whereClause = {};
-    if (search) {
-      whereClause = {
-        ...whereClause,
-        title: { contains: search as string, mode: "insensitive" },
-      };
-    }
-    if (category && category !== "All") {
-      whereClause = {
-        ...whereClause,
-        type: category as string,
-      };
-    }
+    // Transform the date to string format in the response
+    const formattedEvents = events.map((event) => ({
+      ...event,
+      date: event.date.toString().split("T")[0], // This will give you 'YYYY-MM-DD' format
+    }));
 
-    try {
-      const events = await prisma.event.findMany({
-        where: whereClause,
-      });
-      res.status(200).json(events);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      res.status(500).json({ error: "Error fetching events" });
-    }
-  } else {
-    res.setHeader("Allow", ["GET"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+    return NextResponse.json(
+      { message: "Events retrieved successfully", data: formattedEvents },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error retrieving events:", error);
+    return NextResponse.json(
+      { message: "Failed to retrieve events", error: error },
+      { status: 500 }
+    );
+  } finally {
+    await prisma.$disconnect();
   }
 }

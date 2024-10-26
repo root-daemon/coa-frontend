@@ -1,21 +1,39 @@
-// app/api/events/route.ts
+import { NextRequest, NextResponse } from "next/server";
+import { PrismaClient } from "@prisma/client";
 
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+const prisma = new PrismaClient();
 
-export async function GET() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(request: NextRequest) {
   try {
     const events = await prisma.event.findMany({
-      orderBy: {
-        date: "asc", // Optional: Order events by date ascending
+      select: {
+        id: true,
+        title: true,
+        organizer: true,
+        date: true,
+        type: true,
+        registrationOpen: true,
       },
     });
-    return NextResponse.json(events);
-  } catch (error) {
-    console.error("Error fetching events:", error);
+
+    // Transform the date to string format in the response
+    const formattedEvents = events.map((event) => ({
+      ...event,
+      date: event.date.toString().split("T")[0], // This will give you 'YYYY-MM-DD' format
+    }));
+
     return NextResponse.json(
-      { error: "Failed to fetch events" },
+      { message: "Events retrieved successfully", data: formattedEvents },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error retrieving events:", error);
+    return NextResponse.json(
+      { message: "Failed to retrieve events", error: error },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
